@@ -115,8 +115,16 @@ export const update = authedMutation({
     companyId: v.id('companies'),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
+    details: v.optional(
+      v.object({
+        industry: v.optional(v.string()),
+        url: v.optional(v.string()),
+      })
+    ),
   },
   handler: async (ctx, { companyId, ...updates }) => {
+    console.log('[Company Update] Received updates:', updates);
+
     const company = await ctx.db.get(companyId);
 
     if (!company) {
@@ -127,11 +135,16 @@ export const update = authedMutation({
       throw new ConvexError('Not authorized to update this company');
     }
 
+    console.log('[Company Update] Current company:', company);
+
     await ctx.db.patch(companyId, {
       ...updates,
       updatedAt: Date.now(),
     });
 
-    return await ctx.db.get(companyId);
+    const updated = await ctx.db.get(companyId);
+    console.log('[Company Update] Updated company:', updated);
+
+    return updated;
   },
 });

@@ -5,7 +5,12 @@ export const companies = defineTable({
   // Basic fields
   name: v.string(),
   description: v.optional(v.string()),
-
+  details: v.optional(
+    v.object({
+      industry: v.optional(v.string()),
+      url: v.optional(v.string()),
+    })
+  ),
   // Ownership
   userId: v.id('users'),
 

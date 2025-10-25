@@ -4,27 +4,45 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Briefcase, MessageSquare, TrendingUp } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Briefcase, MessageSquare, TrendingUp, Pencil, Save, X } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthQuery, useAuthMutation } from '@/hooks/useConvexQuery';
 import { api } from '@invoice-tracker/backend/convex/_generated/api';
+import { toast } from 'sonner';
 
 export default function DashboardPage() {
   const { session } = useAuth();
   const [initialized, setInitialized] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const { mutate: getOrCreateCompany } = useAuthMutation(api.companies.getOrCreateDefault);
+  const { mutate: updateCompany } = useAuthMutation(api.companies.update);
   const { data: leads } = useAuthQuery(api.leads.list, {});
   const { data: chatLinks } = useAuthQuery(api.chatLinks.list, {});
 
   const [company, setCompany] = useState<any>(null);
   const [loadingCompany, setLoadingCompany] = useState(true);
 
+  const [editForm, setEditForm] = useState({
+    name: '',
+    description: '',
+    industry: '',
+    url: '',
+  });
+
   useEffect(() => {
     if (!initialized && session) {
       getOrCreateCompany({})
         .then((result) => {
           setCompany(result);
+          setEditForm({
+            name: result.name || '',
+            description: result.description || '',
+            industry: result.details?.industry || '',
+            url: result.details?.url || '',
+          });
           setLoadingCompany(false);
           setInitialized(true);
         })
@@ -33,6 +51,61 @@ export default function DashboardPage() {
         });
     }
   }, [initialized, session, getOrCreateCompany]);
+
+  const handleEdit = () => {
+    setEditForm({
+      name: company.name || '',
+      description: company.description || '',
+      industry: company.details?.industry || '',
+      url: company.details?.url || '',
+    });
+    setIsEditing(true);
+  };
+
+  const handleSave = async () => {
+    if (!company?._id) return;
+
+    const name = editForm.name.trim();
+    if (!name) {
+      toast.error('Company name is required');
+      return;
+    }
+
+    try {
+      const industry = editForm.industry.trim() || undefined;
+      const url = editForm.url.trim() || undefined;
+
+      console.log('Updating company with:', {
+        companyId: company._id,
+        name,
+        description: editForm.description.trim() || undefined,
+        details: industry || url ? { industry, url } : undefined,
+      });
+
+      const result = await updateCompany({
+        companyId: company._id,
+        name,
+        description: editForm.description.trim() || undefined,
+        details: industry || url ? {
+          industry,
+          url,
+        } : undefined,
+      });
+
+      console.log('Update result:', result);
+      setCompany(result);
+      setIsEditing(false);
+      toast.success('Company updated successfully');
+    } catch (error) {
+      console.error('Update error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update company';
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+  };
 
   const totalLeads = leads?.length || 0;
   const activeChats = chatLinks?.filter(link => link.status === 'active').length || 0;
@@ -56,10 +129,92 @@ export default function DashboardPage() {
       ) : company ? (
         <Card>
           <CardHeader>
-            <CardTitle>{company.name}</CardTitle>
-            <CardDescription>
-              {company.description || 'Your lead magnet company'}
-            </CardDescription>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                {isEditing ? (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="name">Company Name</Label>
+                      <Input
+                        id="name"
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        placeholder="Company name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="description">Description</Label>
+                      <Input
+                        id="description"
+                        value={editForm.description}
+                        onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                        placeholder="Company description"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="industry">Industry</Label>
+                        <Input
+                          id="industry"
+                          value={editForm.industry}
+                          onChange={(e) => setEditForm({ ...editForm, industry: e.target.value })}
+                          placeholder="e.g., SaaS, E-commerce"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="url">Website URL</Label>
+                        <Input
+                          id="url"
+                          type="url"
+                          value={editForm.url}
+                          onChange={(e) => setEditForm({ ...editForm, url: e.target.value })}
+                          placeholder="https://example.com"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={handleSave} size="sm">
+                        <Save className="h-4 w-4 mr-2" />
+                        Save
+                      </Button>
+                      <Button onClick={handleCancel} variant="outline" size="sm">
+                        <X className="h-4 w-4 mr-2" />
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <CardTitle className="flex items-center gap-2">
+                      {company.name}
+                      {company.details?.url && (
+                        <a
+                          href={company.details.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          🔗
+                        </a>
+                      )}
+                    </CardTitle>
+                    <CardDescription>
+                      {company.details?.industry && (
+                        <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-2">
+                          {company.details.industry}
+                        </span>
+                      )}
+                      {company.description || 'Your lead magnet company'}
+                    </CardDescription>
+                  </>
+                )}
+              </div>
+              {!isEditing && (
+                <Button onClick={handleEdit} variant="ghost" size="icon">
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </CardHeader>
         </Card>
       ) : null}
