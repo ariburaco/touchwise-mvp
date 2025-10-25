@@ -1,0 +1,40 @@
+{
+  "name": "@invoice-tracker/translations",
+  "version": "1.0.0",
+  "description": "Shared translations, constants, and utilities for Invoice Tracker",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "translate": "bun scripts/translate.ts",
+    "translate:tr": "bun scripts/translate.ts --lang=tr",
+    "translate:check": "bun scripts/translate.ts --check",
+    "translate:file": "bun scripts/translate.ts --file",
+    "translate:retry": "bun scripts/translate.ts --retry-failed"
+  },
+  "files": [
+    "**/*"
+  ],
+  "keywords": [
+    "translations",
+    "i18n",
+    "receipts",
+    "invoice-tracker"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "@ai-sdk/google": "^2.0.11",
+    "ai": "^5.0.26",
+    "tsx": "^4.20.5",
+    "dotenv": "^17.2.1",
+    "chalk": "^5.6.0",
+    "ora": "^8.2.0",
+    "commander": "^14.0.0",
+    "zod": "^4.1.4"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./translations": "./src/translations/index.ts"
+  }
+}

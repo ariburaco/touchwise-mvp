@@ -1,0 +1,22 @@
+{
+  "name": "@invoice-tracker/shared",
+  "version": "1.0.0",
+  "description": "Shared types and utilities for Invoice Tracker",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "files": [
+    "**/*"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  },
+  "exports": {
+    "./constants": "./src/constants/index.ts",
+    "./utils": "./src/utils/index.ts",
+    "./types": "./src/types/index.ts"
+  }
+}

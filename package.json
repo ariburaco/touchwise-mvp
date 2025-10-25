@@ -1,0 +1,28 @@
+{
+  "name": "invoice-tracker",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "dev:native": "turbo -F native dev",
+    "dev:web": "turbo -F web dev",
+    "dev:server": "turbo -F @invoice-tracker/backend dev",
+    "dev:setup": "turbo -F @invoice-tracker/backend dev:setup",
+    "typecheck": "turbo run typecheck",
+    "clean": "git clean -xdf node_modules",
+    "clean:workspaces": "turbo clean",
+    "translate": "turbo -F @invoice-tracker/translations translate --",
+    "translate:tr": "turbo -F @invoice-tracker/translations translate:tr",
+    "translate:check": "turbo -F @invoice-tracker/translations translate:check",
+    "translate:fix": "bun translate --lang=tr --fix"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.6"
+  },
+  "packageManager": "bun@1.2.18",
+  "dependencies": {}
+}
