@@ -6,8 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { useAuth } from '@/lib/auth-context';
-import { LanguageToggle } from './language-toggle';
-import { ModeToggle } from './mode-toggle';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
@@ -29,10 +27,7 @@ export default function Header() {
   const { session, signOut } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const links = [
-    { to: '/', label: 'Home' },
-    { to: '/pricing', label: 'Pricing' },
-  ];
+  const links: { to: string; label: string }[] = [];
 
   const router = useRouter();
 
@@ -49,7 +44,7 @@ export default function Header() {
     <header className="bg-background/50 backdrop-blur-sm border-b fixed top-0 left-0 right-0 z-50 shadow-sm">
       <div className="relative flex flex-row items-center justify-between px-4 h-16">
         <Link href="/" className="flex items-center">
-          <h1 className="text-2xl font-bold text-primary">Convex Template</h1>
+          <h1 className="text-2xl font-bold text-primary">Touchwise</h1>
         </Link>
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-6 text-sm font-medium absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-full">
@@ -135,26 +130,12 @@ export default function Header() {
                 )}
               </div>
 
-              {/* Mobile Controls */}
-              <div className="mt-6 pt-6 border-t">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Theme</span>
-                  <ModeToggle />
-                </div>
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-sm font-medium">Language</span>
-                  <LanguageToggle />
-                </div>
-              </div>
             </SheetContent>
           </Sheet>
         </div>
 
         {/* Desktop Right Side Controls */}
         <div className="hidden md:flex items-center gap-2">
-          <LanguageToggle />
-          <ModeToggle />
-
           {session?.user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
