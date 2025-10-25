@@ -1,0 +1,5 @@
+node_modules
+.turbo
+packages/backend/.env.production
+apps/web/public/sw.js
+apps/web/public/workbox-*.js
