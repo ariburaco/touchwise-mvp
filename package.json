@@ -11,6 +11,7 @@
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F web dev",
     "dev:server": "turbo -F @invoice-tracker/backend dev",
+    "dev:firecrawler": "turbo -F firecrawler dev",
     "dev:setup": "turbo -F @invoice-tracker/backend dev:setup",
     "typecheck": "turbo run typecheck",
     "clean": "git clean -xdf node_modules",

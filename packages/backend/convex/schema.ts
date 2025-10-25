@@ -10,6 +10,8 @@ import { usageRules } from './schemas/usageRules.schema';
 import { usageCredits } from './schemas/usageCredits.schema';
 import { usageTracking } from './schemas/usageTracking.schema';
 import { usageEvents } from './schemas/usageEvents.schema';
+import { companies } from './schemas/companies.schema';
+import { leads } from './schemas/leads.schema';
 
 export default defineSchema({
   users,
@@ -23,4 +25,6 @@ export default defineSchema({
   usageCredits,
   usageTracking,
   usageEvents,
+  companies,
+  leads,
 });
