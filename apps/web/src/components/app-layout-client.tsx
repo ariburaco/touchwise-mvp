@@ -17,6 +17,8 @@ import {
   CreditCard,
   Sparkles,
   Activity,
+  Briefcase,
+  MessageSquare,
 } from 'lucide-react';
 import { NotificationBell } from './notifications/notification-bell';
 import {
@@ -51,9 +53,9 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 const navigation = {
   main: [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Usage Metrics', href: '/dashboard/usage', icon: Activity },
+    { name: 'Leads', href: '/dashboard/leads', icon: Briefcase },
+    { name: 'Chats', href: '/dashboard/chats', icon: MessageSquare },
     { name: 'Notifications', href: '/dashboard/notifications', icon: Bell },
-    { name: 'Billing', href: '/dashboard/billing', icon: CreditCard },
   ],
   settings: [
     { name: 'Settings', href: '/dashboard/settings', icon: Settings },

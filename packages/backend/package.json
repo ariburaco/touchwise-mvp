@@ -16,9 +16,10 @@
   "dependencies": {
     "@ai-sdk/google": "^2.0.11",
     "@convex-dev/better-auth": "^0.7.17",
+    "@convex-dev/workpool": "^0.2.18",
+    "@mendable/firecrawl-js": "^4.4.1",
     "@polar-sh/better-auth": "^1.1.0",
     "@polar-sh/sdk": "^0.34.13",
-    "@convex-dev/workpool": "^0.2.18",
     "@react-email/components": "^0.5.1",
     "@react-email/render": "^1.2.1",
     "ai": "^5.0.26",

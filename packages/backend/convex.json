@@ -1,7 +1,8 @@
 {
   "node": {
     "externalPackages": [
-      "@react-email/render"
+      "@react-email/render",
+      "@mendable/firecrawl-js"
     ]
   }
 }

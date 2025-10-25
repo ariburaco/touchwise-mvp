@@ -1,207 +1,165 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  Settings,
-  Shield,
-  CreditCard,
-  User,
-  LogOut,
-  HelpCircle
-} from 'lucide-react';
+import { Briefcase, MessageSquare, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
-import { authClient } from '@/lib/auth-client';
-import { useRouter } from 'next/navigation';
+import { useAuthQuery, useAuthMutation } from '@/hooks/useConvexQuery';
+import { api } from '@invoice-tracker/backend/convex/_generated/api';
 
 export default function DashboardPage() {
   const { session } = useAuth();
-  const router = useRouter();
-  
-  const getUserInitials = (name: string | undefined) => {
-    if (!name) return 'U';
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  const [initialized, setInitialized] = useState(false);
 
-  const handleSignOut = async () => {
-    await authClient.signOut();
-    router.push('/auth/login');
-  };
+  const { mutate: getOrCreateCompany } = useAuthMutation(api.companies.getOrCreateDefault);
+  const { data: leads } = useAuthQuery(api.leads.list, {});
+  const { data: chatLinks } = useAuthQuery(api.chatLinks.list, {});
+
+  const [company, setCompany] = useState<any>(null);
+  const [loadingCompany, setLoadingCompany] = useState(true);
+
+  useEffect(() => {
+    if (!initialized && session) {
+      getOrCreateCompany({})
+        .then((result) => {
+          setCompany(result);
+          setLoadingCompany(false);
+          setInitialized(true);
+        })
+        .catch((error) => {
+          setLoadingCompany(false);
+        });
+    }
+  }, [initialized, session, getOrCreateCompany]);
+
+  const totalLeads = leads?.length || 0;
+  const activeChats = chatLinks?.filter(link => link.status === 'active').length || 0;
+  const recentLeads = leads?.slice(0, 5) || [];
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Welcome back, {session?.user?.name || session?.user?.email || 'User'}!
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={session?.user?.image || undefined} />
-            <AvatarFallback>{getUserInitials(session?.user?.name)}</AvatarFallback>
-          </Avatar>
-          <div className="hidden md:block">
-            <p className="text-sm font-medium">{session?.user?.name || 'User'}</p>
-            <p className="text-xs text-muted-foreground">{session?.user?.email}</p>
-          </div>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground mt-1">
+          Welcome back, {session?.user?.name || 'User'}!
+        </p>
       </div>
 
-      {/* Quick Navigation */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Link href="/dashboard/profile">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Profile</CardTitle>
-              <User className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">Account</div>
-              <p className="text-xs text-muted-foreground">
-                Manage your profile information
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/dashboard/settings/security">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Security</CardTitle>
-              <Shield className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">Settings</div>
-              <p className="text-xs text-muted-foreground">
-                Password & 2FA settings
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/dashboard/billing">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Billing</CardTitle>
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">Subscription</div>
-              <p className="text-xs text-muted-foreground">
-                Manage your subscription
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/dashboard/settings">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Settings</CardTitle>
-              <Settings className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">Preferences</div>
-              <p className="text-xs text-muted-foreground">
-                App settings & preferences
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
-
-      {/* Account Overview */}
-      <div className="grid gap-6 md:grid-cols-2">
+      {loadingCompany ? (
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-muted-foreground">Loading company...</p>
+          </CardContent>
+        </Card>
+      ) : company ? (
         <Card>
           <CardHeader>
-            <CardTitle>Account Information</CardTitle>
-            <CardDescription>Your account details</CardDescription>
+            <CardTitle>{company.name}</CardTitle>
+            <CardDescription>
+              {company.description || 'Your lead magnet company'}
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Email</span>
-                <span className="text-sm text-muted-foreground">{session?.user?.email}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Name</span>
-                <span className="text-sm text-muted-foreground">{session?.user?.name || 'Not set'}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Email Verified</span>
-                <span className="text-sm text-muted-foreground">
-                  {session?.user?.emailVerified ? 'Yes' : 'No'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">2FA Status</span>
-                <span className="text-sm text-muted-foreground">
-                  {(session?.user as any)?.twoFactorEnabled ? 'Enabled' : 'Disabled'}
-                </span>
-              </div>
+        </Card>
+      ) : null}
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
+            <Briefcase className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalLeads}</div>
+            <p className="text-xs text-muted-foreground">
+              Lead URLs added
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Chats</CardTitle>
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{activeChats}</div>
+            <p className="text-xs text-muted-foreground">
+              Chat links generated
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <Link href="/dashboard/leads">
+              <Button className="w-full" size="sm">
+                Add Lead
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Recent Leads</CardTitle>
+              <CardDescription>Your latest lead URLs</CardDescription>
             </div>
-            <div className="pt-4">
-              <Link href="/dashboard/profile">
-                <Button variant="outline" className="w-full">
-                  <User className="mr-2 h-4 w-4" />
-                  Edit Profile
+            <Link href="/dashboard/leads">
+              <Button variant="outline" size="sm">View All</Button>
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {recentLeads.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Briefcase className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <p>No leads yet</p>
+              <Link href="/dashboard/leads">
+                <Button variant="link" className="mt-2">
+                  Add your first lead
                 </Button>
               </Link>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common tasks</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <Link href="/dashboard/settings/security">
-              <Button variant="outline" className="w-full justify-start">
-                <Shield className="mr-2 h-4 w-4" />
-                Security Settings
-              </Button>
-            </Link>
-            <Link href="/dashboard/billing">
-              <Button variant="outline" className="w-full justify-start">
-                <CreditCard className="mr-2 h-4 w-4" />
-                Manage Subscription
-              </Button>
-            </Link>
-            <Link href="/dashboard/settings">
-              <Button variant="outline" className="w-full justify-start">
-                <Settings className="mr-2 h-4 w-4" />
-                App Settings
-              </Button>
-            </Link>
-            <Link href="/support">
-              <Button variant="outline" className="w-full justify-start">
-                <HelpCircle className="mr-2 h-4 w-4" />
-                Help & Support
-              </Button>
-            </Link>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start text-red-600 hover:text-red-700"
-              onClick={handleSignOut}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+          ) : (
+            <div className="space-y-4">
+              {recentLeads.map((lead) => (
+                <div
+                  key={lead._id}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">
+                      {lead.title || lead.url}
+                    </p>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {lead.url}
+                    </p>
+                  </div>
+                  <div className="ml-4">
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      lead.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      lead.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                      lead.status === 'failed' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {lead.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

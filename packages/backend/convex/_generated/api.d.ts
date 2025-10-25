@@ -8,9 +8,13 @@
  * @module
  */
 
+import type * as actions_scrapeCompany from "../actions/scrapeCompany.js";
 import type * as activityLogs from "../activityLogs.js";
 import type * as auth from "../auth.js";
 import type * as authHooks from "../authHooks.js";
+import type * as chatLinks from "../chatLinks.js";
+import type * as chats from "../chats.js";
+import type * as companies from "../companies.js";
 import type * as emails_MagicLinkEmail from "../emails/MagicLinkEmail.js";
 import type * as emails_NotificationEmail from "../emails/NotificationEmail.js";
 import type * as emails_PasswordResetEmail from "../emails/PasswordResetEmail.js";
@@ -23,6 +27,7 @@ import type * as helpers_logger from "../helpers/logger.js";
 import type * as helpers_queryHelpers from "../helpers/queryHelpers.js";
 import type * as helpers_usageHelpers from "../helpers/usageHelpers.js";
 import type * as http from "../http.js";
+import type * as leads from "../leads.js";
 import type * as notifications from "../notifications.js";
 import type * as polarCustomers from "../polarCustomers.js";
 import type * as polyfills from "../polyfills.js";
@@ -58,9 +63,13 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  "actions/scrapeCompany": typeof actions_scrapeCompany;
   activityLogs: typeof activityLogs;
   auth: typeof auth;
   authHooks: typeof authHooks;
+  chatLinks: typeof chatLinks;
+  chats: typeof chats;
+  companies: typeof companies;
   "emails/MagicLinkEmail": typeof emails_MagicLinkEmail;
   "emails/NotificationEmail": typeof emails_NotificationEmail;
   "emails/PasswordResetEmail": typeof emails_PasswordResetEmail;
@@ -73,6 +82,7 @@ declare const fullApi: ApiFromModules<{
   "helpers/queryHelpers": typeof helpers_queryHelpers;
   "helpers/usageHelpers": typeof helpers_usageHelpers;
   http: typeof http;
+  leads: typeof leads;
   notifications: typeof notifications;
   polarCustomers: typeof polarCustomers;
   polyfills: typeof polyfills;
