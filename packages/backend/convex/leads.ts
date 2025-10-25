@@ -3,6 +3,7 @@ import { authedMutation, authedQuery } from './helpers/queryHelpers';
 import { ConvexError } from 'convex/values';
 import { internal } from './_generated/api';
 import { internalMutation, internalQuery } from './_generated/server';
+import { scraperPool } from './workpool';
 
 /**
  * Create a new lead
@@ -35,9 +36,7 @@ export const create = authedMutation({
       updatedAt: Date.now(),
     });
 
-    await ctx.scheduler.runAfter(0, internal.actions.scrapeCompany.scrapeAndUpdateLead, {
-      leadId,
-    });
+    await scraperPool.enqueue(ctx, { leadId });
 
     return await ctx.db.get(leadId);
   },

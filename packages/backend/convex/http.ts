@@ -15,8 +15,12 @@ import { cors } from 'hono/cors';
 import { internal } from './_generated/api';
 import { ActionCtx } from './_generated/server';
 import { createAuth } from './auth';
+import { scraperPool } from './workpool';
 
 const app: HonoWithConvex<ActionCtx> = new Hono();
+
+// Register workpool HTTP endpoint
+app.use(scraperPool);
 
 app.use(
   '/api/auth/*',
